@@ -1,0 +1,26 @@
+#!/bin/zsh
+# claude-spend: estimated Claude Code spend across all local sessions (via ccusage).
+# Estimates use API list prices and only cover sessions run on this Mac.
+#
+# Usage:
+#   claude-spend            monthly totals + last 7 days
+#   claude-spend today      today only
+#   claude-spend week       last 7 days, per day
+#   claude-spend month      this month, per day
+#   claude-spend sessions   one row per session
+#   claude-spend <args...>  passed straight to ccusage (e.g. claude-spend daily --since 20261001)
+
+CCUSAGE=(npx -y ccusage@20.0.37)
+
+case "$1" in
+  "")
+    "${CCUSAGE[@]}" monthly
+    "${CCUSAGE[@]}" daily --since "$(date -v-6d +%Y%m%d)"
+    ;;
+  today)    "${CCUSAGE[@]}" daily --since "$(date +%Y%m%d)" ;;
+  week)     "${CCUSAGE[@]}" daily --since "$(date -v-6d +%Y%m%d)" ;;
+  month)    "${CCUSAGE[@]}" daily --since "$(date +%Y%m01)" ;;
+  sessions) "${CCUSAGE[@]}" session ;;
+  -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *)        "${CCUSAGE[@]}" "$@" ;;
+esac
